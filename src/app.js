@@ -1,31 +1,35 @@
 const express = require("express")
-
+const connectDB = require("./config/database")
 const app = express()
-const {adminAuth,userAuth}= require("./middleware/auth")
- // Handle auth midlleware for all GET,POST....  request
+const User = require("./models/user")
 
-app.use("/admin",adminAuth)
-//app.use("/user",userAuth)
 
-app.post("/user/login",(req,res)=>{
-    res.send("user logged sucessfully")
+app.post('/signup',async (req,res)=>{
+    const user = new User({
+        firstName :"jone",
+        lastName:"doe",
+        emailId :"jone@gmail.com",
+        password:"jone@123"
+    })
+    try{
+        await user.save()
+        res.send("User addd successfully")
+    }catch(err){
+        res.status(400).send("error saving the users" + err.message)
+    }
 })
 
-app.get("/user",userAuth,(req,res)=>{
-   res.send("user data sent")
-})
-
-app.get("/admin/getAllData",(req,res) =>{
-        res.send("all data is sent")
-    
-})
 
 
-app.get("/admin/DeleteData",(req,res) =>{
-    res.send("all data deleted")
-})
+// remmeber first connect your database and then app.listen
+connectDB().then(() =>{
+    console.log("database connected successfully...")
+    app.listen(7777,()=>{
+        console.log("start server on 7777")
+    })
+ }).catch(err =>{
+    console.error('database connot connect ')
+ })
 
-app.listen(7777,()=>{
-    console.log("start server on 7777")
-})
+
 
