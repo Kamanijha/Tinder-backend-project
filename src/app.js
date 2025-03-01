@@ -40,6 +40,69 @@ app.post('/signup', async (req,res)=>{
     }
 })
 
+// get user from database using email
+app.get("/user",async (req,res) =>{
+    const userEmail = req.body.emailId
+    try{
+        const users = await User.find({emailId: userEmail})
+        if(users.length === 0){
+            res.status(404).send("user not found")
+        }else{
+            res.send(users)
+        }
+    }catch(err){
+        res.status(400).send("something went wrong")
+    }
+})
+
+
+// feed api - GET/feed - get all the users from the database
+app.get("/feed",async (req,res) =>{
+   try{
+     const users = await User.find({})
+     res.send(users)
+   }catch(err){
+        res.status(400).send("something went wrong")
+    }
+})
+
+// delete user
+app.delete("/user",async (req,res) =>{
+     const userId = req.body.userId
+     console.log(userId)
+     try{
+        const users = await User.findByIdAndDelete({_id:userId})
+        //const users = await User.findByIdAndDelete(userId)
+        console.log(users)
+        res.send("deleted sucessfully")
+    }catch(err){
+        res.status(400).send("something went wrong")
+    }
+})
+
+// update the user
+app.patch("/user",async (req,res) =>{
+    const userId = req.body.userId
+    const data = req.body
+    try{
+        const users= await User.findByIdAndUpdate(userId, data)
+        res.send("update sucessfully")
+    }catch(err){
+        res.status(400).send("something went wrong")
+    }
+})
+
+app.put("/user",async (req,res)=>{
+    const userId = req.body.userId
+    const data = req.body
+    try{
+        const users= await User.findByIdAndUpdate(userId, data)
+        res.send("update sucessfully")
+    }catch(err){
+        res.status(400).send("something went wrong")
+    }
+})
+
 // remmeber first connect your database and then app.listen
 connectDB().then(() =>{
     console.log("database connected successfully...")
