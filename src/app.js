@@ -1,5 +1,5 @@
 const express = require("express")
-const connectDB = require("./config/database")
+const connectDB = require("./config/database.js")
 const app = express()
 const User = require("./models/user")
 // express middleware 
@@ -27,18 +27,24 @@ app.use(express.json())
 //     }
 // })
 
+
+
 app.post('/signup', async (req,res)=>{
     console.log(req.body)
-    
-    // creating a new instance of the User model
-    const user = new User(req.body)
     try{
+         // creating a new instance of the User model
+         const user = new User(req.body)
         await user.save()
         res.send("User addd successfully")
     }catch(err){
         res.status(400).send("error saving the users" + err.message)
     }
 })
+
+
+
+
+
 
 // get user from database using email
 app.get("/user",async (req,res) =>{
@@ -110,7 +116,7 @@ connectDB().then(() =>{
         console.log("start server on 7777")
     })
  }).catch(err =>{
-    console.error('database connot connect ')
+    console.error('database connot connect ', err.message)
  })
 
 
