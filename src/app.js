@@ -1,5 +1,7 @@
 const express = require("express")
 const connectDB = require("./config/database.js")
+const {validateSignUpData} = require("./utils/validation.js")
+const bcrypt = require("bcrypt")
 const app = express()
 const User = require("./models/user")
 // express middleware 
@@ -30,10 +32,24 @@ app.use(express.json())
 
 
 app.post('/signup', async (req,res)=>{
-    console.log(req.body)
+    //console.log(req.body)
     try{
+    // validation of data
+    validateSignUpData(req)
+
+    const {firstName,lastName,emailId,password} = req.body
+    // encrypt the password
+    const passwordHash = await bcrypt.hash(password,10)
+    console.log(passwordHash)
+
+    
          // creating a new instance of the User model
-         const user = new User(req.body)
+         const user = new User({
+            firstName,
+            lastName,
+            emailId,
+            password : passwordHash,
+         })
         await user.save()
         res.send("User addd successfully")
     }catch(err){
@@ -41,9 +57,27 @@ app.post('/signup', async (req,res)=>{
     }
 })
 
+app.post("/login",async (req,res) => {
+    try {
+      const {emailId,password} = req.body 
 
+      const user = await User.findOne({emailId : emailId})
+      if(!user) {
+        throw new Error("invalid credentials"); 
+      }
+      const isPasswordVaild = await bcrypt.compare(password, user.password)
+      if(isPasswordVaild){
+        res.send("Login Successful !")
+      }else{
+        throw new Error("invalid credentials");
+        
+      }
 
-
+        
+    } catch (err) {
+        res.status(400).send("ERROR : " + err.message)
+    }
+})
 
 
 // get user from database using email
@@ -87,14 +121,35 @@ app.delete("/user",async (req,res) =>{
 })
 
 // update the user
-app.patch("/user",async (req,res) =>{
-    const userId = req.body.userId
+app.patch("/user/:userId",async (req,res) =>{
+    const userId = req.params?.userId
     const data = req.body
+     console.log(data)
     try{
+       
+        const UPDATE_ALLOWED = [
+            "firstName", 
+            "profile",
+            "lastName",
+            "gender",
+            "skill"
+       ]
+       const isUpdateAllowed = Object.keys(data).every((k) =>
+        UPDATE_ALLOWED.includes(k)
+       )
+       if(!isUpdateAllowed){
+         throw new Error("udate is not allowed");
+         
+       }
+       if(data?.skill.length > 10){
+        throw new Error("can not add skill more then 10");
+        
+       }
+
         const users= await User.findByIdAndUpdate(userId, data)
         res.send("update sucessfully")
     }catch(err){
-        res.status(400).send("something went wrong")
+        res.status(400).send("UPDATE_FAILED" , err.message)
     }
 })
 

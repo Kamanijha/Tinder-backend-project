@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-
+const validator = require("validator")
 const userSchema = new mongoose.Schema({
     firstName:{
         type:String,
@@ -13,7 +13,13 @@ const userSchema = new mongoose.Schema({
         lowercase:true,
         trim:true,
         required:true,
-        unique:true
+        unique:true,
+        validate:{
+            validator:function(value){
+                return validator.isURL(value)
+            },
+            message:"invalid photo url"
+        }
     },
     password:{
         type:String,
@@ -35,6 +41,16 @@ const userSchema = new mongoose.Schema({
         validate(value){
             if(!["male","female","other"].includes(value)){
                 throw new Error("gender is not valid");
+                
+            }
+        }
+    },
+    photoUrl:{
+        type:String,
+        default:"https://www.freeiconspng.com/images/profile-icon-png",
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("invalid PHOTO  URL");
                 
             }
         }
