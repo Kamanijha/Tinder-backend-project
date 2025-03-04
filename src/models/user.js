@@ -25,13 +25,13 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true,
         trim:true,
-        validate:{
-            validator(value){
-                return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value)
-            
+        validate: {
+            validator(value) {
+                return /^(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(value);
             },
-            message:"password sholud be 8 character nclude a number, a letter, and a special character"
+            message: "password should be strong"
         }
+        
     },
     age:{
         type:Number
