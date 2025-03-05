@@ -1,5 +1,8 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+
 const userSchema = new mongoose.Schema({
     firstName:{
         type:String,
@@ -71,16 +74,31 @@ const userSchema = new mongoose.Schema({
 // duplicate email handler function
 //userSchema.index({ emailId: 1 }, { unique: true });
 userSchema.pre("save", async function (next) {
-    // ✅ Correct way to check duplicate email
+    //   check duplicate email
     const existingUser = await this.constructor.findOne({ emailId: this.emailId });
 
     if (existingUser) {
-        return next(new Error("Email already exists!")); // Reject duplicate email
+        return next(new Error("Email already exists!")); 
     }
     next();
 });
 
+userSchema.methods.getJWT = async function () {
+    const user = this
 
+    const token = await jwt.sign({ _id: user._id }, "Tinder@123$456",{expiresIn : "7d"})
+
+    return token
+}
+
+userSchema.methods.validatePassword = async function (userInputPassword){
+    const user = this
+    const passwordHash = user.password
+    
+    const isPasswordVaild = await bcrypt.compare(userInputPassword,passwordHash )
+
+    return isPasswordVaild
+}
 
  const userModel = mongoose.model("user",userSchema)
  module.exports = userModel

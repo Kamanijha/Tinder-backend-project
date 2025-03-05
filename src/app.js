@@ -69,16 +69,16 @@ app.post("/login", async (req, res) => {
         if (!user) {
             throw new Error("invalid credentials");
         }
-        const isPasswordVaild = await bcrypt.compare(password, user.password)
+        const isPasswordVaild = await user.validatePassword(password)
         if (isPasswordVaild) {
             // crreate JWT token
 
-            const token = await jwt.sign({ _id: user._id }, "Tinder@123$456",{expiresIn : "7d"})
-            console.log(token)
+            const token = await user.getJWT()
+           // console.log(token)
             // add the token to cookie and send the response back to the user
 
             res.cookie("token", token,{
-                expires: new Date(Date.now() * 8 * 3600000)
+                expires: new Date(Date.now() + 8 * 3600000)
             })
             res.send("Login Successful !")
         } else {
@@ -94,26 +94,7 @@ app.post("/login", async (req, res) => {
 
 app.get("/profile", userAuth, async (req, res) => {
     try {
-        // const cookie = req.cookies
-
-        // const {token} = cookie
-        // if(!token){
-        //     throw new Error("Invalid token");
-
-        // }
-        // validate token
-
-        //const decodedMessage = await jwt.verify(token,"Tinder@123$456")
-        //console.log(decodedMessage)
-        //const {_id} = decodedMessage
-        //console.log("Logged in user is :" + _id)
-
-        //const user = await User.findById(_id)
-        //console.log(user)
-        //  if(!user){
-        //     throw new Error("user does not pesent");
-        //  }
-        //console.log(cookie)
+       
         const user = req.user
         res.send(user)
     } catch (err) {
@@ -212,7 +193,7 @@ app.put("/user", async (req, res) => {
     }
 })
 
-// remmeber first connect your database and then app.listen
+//  first connect to  database and then app.listen
 connectDB().then(() => {
     console.log("database connected successfully...")
     app.listen(7777, () => {
