@@ -41,12 +41,16 @@ const userSchema = new mongoose.Schema({
     },
     gender:{
         type:String,
-        validate(value){
-            if(!["male","female","other"].includes(value)){
-                throw new Error("gender is not valid");
-                
-            }
+        enum: {
+            values: ["male","female","other"],
+            message: `{VALUE} is not supported`
         }
+        // validate(value){
+        //     if(!["male","female","other"].includes(value)){
+        //         throw new Error("gender is not valid");
+                
+        //     }
+        // }
     },
     photoUrl:{
         type:String,
@@ -72,16 +76,19 @@ const userSchema = new mongoose.Schema({
 },{timestamps:true})
 
 // duplicate email handler function
-//userSchema.index({ emailId: 1 }, { unique: true });
-userSchema.pre("save", async function (next) {
-    //   check duplicate email
-    const existingUser = await this.constructor.findOne({ emailId: this.emailId });
 
-    if (existingUser) {
-        return next(new Error("Email already exists!")); 
+
+userSchema.pre("save", async function (next) {
+    if (this.isModified("emailId")) { // Run check only if email is modified
+        const existingUser = await this.constructor.findOne({ emailId: this.emailId });
+        if (existingUser) {
+            return next(new Error("Email already exists!")); 
+        }
     }
     next();
 });
+
+
 
 userSchema.methods.getJWT = async function () {
     const user = this
