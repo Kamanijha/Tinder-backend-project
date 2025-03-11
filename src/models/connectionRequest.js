@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const connectionRequestSchema = new mongoose.Schema({
     fromUserId:{
         type:mongoose.Schema.Types.ObjectId,
+        ref:"User",  // reference to User collection
         required:true
     },
     toUserId:{
@@ -17,7 +18,7 @@ const connectionRequestSchema = new mongoose.Schema({
     },
 },{timestamps:true})
 
-// index toUserId and fromUserId to prevent duplicate request
+// index toUserId and fromUserId to prevent duplicate request  compound index
 connectionRequestSchema.index({toUserId:1,fromUserId:1},{unique:true})
 
 // prevent self request
