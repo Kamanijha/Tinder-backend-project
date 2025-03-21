@@ -16,6 +16,8 @@ const app = express()
 // const User = require("./models/user")
 const { now } = require("mongoose")
 // express middleware 
+
+require("dotenv").config()
 app.use(cors({
     origin:"http://localhost:5175",
     credentials:true
@@ -42,7 +44,7 @@ app.use("/", userRouter)
 //  first connect to  database and then app.listen
 connectDB().then(() => {
     console.log("database connected successfully...")
-    app.listen(7777, () => {
+    app.listen(process.env.PORT, () => {
         console.log("start server on 7777")
     })
 }).catch(err => {
