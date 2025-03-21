@@ -37,10 +37,12 @@ const userSchema = new mongoose.Schema({
         
     },
     age:{
-        type:Number
+        type:Number,
+       
     },
     gender:{
         type:String,
+       
         enum: {
             values: ["male","female","other"],
             message: `{VALUE} is not supported`
@@ -54,7 +56,7 @@ const userSchema = new mongoose.Schema({
     },
     photoUrl:{
         type:String,
-        default:"https://www.freeiconspng.com/images/profile-icon-png",
+        default:"https://newlife-hospitals.com/wp-content/uploads/2016/06/Dummy-Person.png",
         validate(value){
             if(!validator.isURL(value)){
                 throw new Error("invalid PHOTO  URL");

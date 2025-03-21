@@ -17,35 +17,35 @@ userRouter.get("/user/request/received",userAuth,async (req,res) => {
        const connectionRequest = await ConnectionRequestModel.find({
            toUserId : loggedInUser._id,
            status : "interested"
-       }).populate("fromUserId", "firstName lastName photoUrl")
+       }).populate("fromUserId", "firstName lastName photoUrl age gender about")
        res.json({message:"data featched sucessfully",data:connectionRequest})
     } catch (err) {
         res.status(400).send("ERROR : " + err.message)
     }
 })
 
-userRouter.get("/user/connection",userAuth,async (req,res) => {
-    try {
-        const loggedInUser = req.user
-        const connectionRequest = await ConnectionRequestModel.find({
-            $or :[
-                {toUserId : loggedInUser._id , status: "accepted"},
-                {fromUserId : loggedInUser._id, status: "accepted"}
-            ]
-        }).populate("fromUserId", "firstName lastName photoUrl").populate("toUserId", "firstName lastName photoUrl")
+// userRouter.get("/user/connection",userAuth,async (req,res) => {
+//     try {
+//         const loggedInUser = req.user
+//         const connectionRequest = await ConnectionRequestModel.find({
+//             $or :[
+//                 {toUserId : loggedInUser._id , status: "accepted"},
+//                 {fromUserId : loggedInUser._id, status: "accepted"}
+//             ]
+//         }).populate("fromUserId", "firstName lastName photoUrl age gender about").populate("toUserId", "firstName lastName photoUrl age gender about")
 
-         const data = connectionRequest.map((row) =>{
-            if(row.fromUserId.equals(loggedInUser._id)){
-                return row.toUserId
-            }
-            return row.fromUserId
-         })
-        res.json({data})
-    } catch (err) {
-        res.status(400).send({message:"ERROR : " + err.message})
+//          const data = connectionRequest.map((row) =>{
+//             if(row.fromUserId.equals(loggedInUser._id)){
+//                 return row.toUserId
+//             }
+//             return row.fromUserId
+//          })
+//         res.json({data})
+//     } catch (err) {
+//         res.status(400).send({message:"ERROR : " + err.message})
         
-    }
-})
+//     }
+// })
 
 
 
@@ -55,6 +55,39 @@ userRouter.get("/user/connection",userAuth,async (req,res) => {
 // his connectiion
 // ignored people
 // already sent connection request
+
+
+
+userRouter.get("/user/connection", userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+        
+        const connectionRequest = await ConnectionRequestModel.find({
+            $or: [
+                { toUserId: loggedInUser._id, status: "accepted" },
+                { fromUserId: loggedInUser._id, status: "accepted" }
+            ]
+        })
+        .populate("fromUserId", "firstName lastName photoUrl age gender about")
+        .populate("toUserId", "firstName lastName photoUrl age gender about");
+
+        const data = connectionRequest.map((row) => {
+            if (row.fromUserId && row.fromUserId._id && row.fromUserId._id.equals(loggedInUser._id)) {
+                return row.toUserId || null;  // Return null if `toUserId` is missing
+            }
+            return row.fromUserId || null;    // Return null if `fromUserId` is missing
+        }).filter(Boolean); // Remove any null values from the final array
+
+        res.json({ data });
+    } catch (err) {
+        res.status(400).send({ message: "ERROR : " + err.message });
+    }
+});
+
+
+
+
+
 userRouter.get("/feed",userAuth,async (req,res) => {
 
    try {
